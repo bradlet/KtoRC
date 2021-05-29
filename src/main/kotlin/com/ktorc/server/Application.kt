@@ -12,16 +12,20 @@ import java.time.Duration
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "localhost") {
-        install(WebSockets) {
-            pingPeriod = Duration.ofSeconds(15)
-            timeout = Duration.ofSeconds(15)
-            maxFrameSize = Long.MAX_VALUE
-            masking = false
-        }
-
-        routing {
-            getGlobalChat()
-            getChatRoom()
-        }
+        setupWebSockets()
     }.start(wait = true)
+}
+
+fun Application.setupWebSockets() {
+    install(WebSockets) {
+        pingPeriod = Duration.ofSeconds(15)
+        timeout = Duration.ofSeconds(15)
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
+    }
+
+    routing {
+        getGlobalChat()
+        getChatRoom()
+    }
 }

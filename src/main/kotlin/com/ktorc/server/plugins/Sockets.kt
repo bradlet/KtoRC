@@ -37,6 +37,9 @@ fun Route.getGlobalChat() {
     }
 }
 
+/**
+ * Chat Room Session Path
+ */
 fun Route.getChatRoom() {
     webSocket("/room/{${KtorcConstants.Params.ROOM_IDENTIFIER}}") {
         val room = call.parameters[KtorcConstants.Params.ROOM_IDENTIFIER] ?:

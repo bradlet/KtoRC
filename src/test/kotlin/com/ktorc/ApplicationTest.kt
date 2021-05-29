@@ -1,7 +1,7 @@
 package com.ktorc
 
 import com.ktorc.KtorcConstants.STD_RESPONSE_FORMAT
-import com.ktorc.server.plugins.configureSockets
+import com.ktorc.server.setupWebSockets
 import io.ktor.http.cio.websocket.*
 import kotlin.test.*
 import io.ktor.server.testing.*
@@ -16,7 +16,7 @@ class ApplicationTest {
 
     @Test
     fun testConventionalConversation() {
-        withTestApplication({ configureSockets() }) {
+        withTestApplication({ setupWebSockets() }) {
 
             handleWebSocketConversation("/", {
                 addHeader(KtorcConstants.Headers.USER_IDENTIFIER, testUId)
