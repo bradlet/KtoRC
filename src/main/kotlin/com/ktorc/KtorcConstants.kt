@@ -7,4 +7,8 @@ object KtorcConstants {
     object Headers {
         const val USER_IDENTIFIER = "user_id"
     }
+
+    object Params {
+        const val ROOM_IDENTIFIER = "room_id"
+    }
 }

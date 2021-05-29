@@ -9,11 +9,13 @@ import kotlinx.coroutines.delay
 
 class ApplicationTest {
 
+    companion object {
+        private const val testUId = "test_user"
+        private val testMessages = listOf("Who goes there?!", "This is a weird echo")
+    }
+
     @Test
     fun testConventionalConversation() {
-        val testUId = "test_user"
-        val testMessages = listOf("Who goes there?!", "This is a weird echo")
-
         withTestApplication({ configureSockets() }) {
 
             handleWebSocketConversation("/", {
