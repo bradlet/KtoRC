@@ -1,5 +1,5 @@
 # KtoRC
-###### A client-server IRC client
+###### An IRC Client-Server Project
 
 ### Class Information
 > **PSU Spring 2021**  
