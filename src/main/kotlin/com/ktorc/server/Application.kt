@@ -1,4 +1,4 @@
-package com.ktorc
+package com.ktorc.server
 
 import com.ktorc.server.plugins.configureSockets
 import io.ktor.server.engine.*
