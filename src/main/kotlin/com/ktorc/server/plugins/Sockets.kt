@@ -21,6 +21,8 @@ fun Application.configureSockets() {
             val userId: String = call.request.headers[KtorcConstants.Headers.USER_IDENTIFIER] ?:
                 throw IllegalAccessError("User identifier absent; Please provide user id.")
 
+            send("Welcome $userId to the global chat!")
+
             for (frame in incoming) {
                 when (frame) {
                     is Frame.Text -> {

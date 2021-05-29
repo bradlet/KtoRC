@@ -18,6 +18,9 @@ class ApplicationTest {
             handleWebSocketConversation("/", {
                 addHeader(KtorcConstants.Headers.USER_IDENTIFIER, testUId)
             }) { incoming, outgoing ->
+                val welcomeMsg = (incoming.receive() as Frame.Text).readText()
+                assert(welcomeMsg.isNotEmpty())
+
                 for (msg in testMessages) {
                     outgoing.send(Frame.Text(msg))
 
