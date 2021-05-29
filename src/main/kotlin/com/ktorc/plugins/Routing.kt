@@ -20,20 +20,12 @@ fun Application.configureRouting() {
         get("/") {
             call.respondText("Hello World!")
         }
-        get<MyLocation> {
-            call.respondText("Location: name=${it.name}, arg1=${it.arg1}, arg2=${it.arg2}")
-        }
-        // Register nested routes
-        get<Type.Edit> {
-            call.respondText("Inside $it")
-        }
-        get<Type.List> {
-            call.respondText("Inside $it")
-        }
+
         // Static feature. Try to access `/static/ktor_logo.svg`
         static("/static") {
             resources("static")
         }
+
         install(StatusPages) {
             exception<AuthenticationException> { cause ->
                 call.respond(HttpStatusCode.Unauthorized)
