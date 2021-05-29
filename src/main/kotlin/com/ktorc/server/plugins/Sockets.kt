@@ -1,6 +1,7 @@
 package com.ktorc.server.plugins
 
 import com.ktorc.KtorcConstants
+import com.ktorc.KtorcConstants.STD_RESPONSE_FORMAT
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import java.time.*
@@ -17,18 +18,18 @@ fun Application.configureSockets() {
 
     routing {
         webSocket("/") { // websocketSession
-            val userId = call.request.headers[KtorcConstants.Headers.USER_IDENTIFIER]
+            val userId: String = call.request.headers[KtorcConstants.Headers.USER_IDENTIFIER] ?:
+                throw IllegalAccessError("User identifier absent; Please provide user id.")
 
             for (frame in incoming) {
                 when (frame) {
                     is Frame.Text -> {
                         val text = frame.readText()
+
                         outgoing.send(
-                            if (userId.isNullOrBlank())
-                                Frame.Text("$userId SAID: $text")
-                            else
-                                Frame.Text("Unknown UID, please identify yourself.")
+                            Frame.Text(STD_RESPONSE_FORMAT.format(userId, text))
                         )
+
                         if (text.equals("bye", ignoreCase = true)) {
                             close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
                         }
