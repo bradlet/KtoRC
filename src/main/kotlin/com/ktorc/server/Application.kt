@@ -1,6 +1,6 @@
 package com.ktorc
 
-import com.ktorc.plugins.configureSockets
+import com.ktorc.server.plugins.configureSockets
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 

@@ -1,4 +1,4 @@
-package com.ktorc.plugins
+package com.ktorc.server.plugins
 
 import io.ktor.features.*
 import io.ktor.application.*
