@@ -1,6 +1,7 @@
 package com.ktorc.server
 
 import com.ktorc.KtorcConstants
+import com.ktorc.KtorcConstants.DEFAULT_ROOM
 import com.ktorc.KtorcConstants.Paths
 import io.ktor.http.cio.websocket.*
 import io.ktor.response.*
@@ -37,7 +38,10 @@ suspend fun DefaultWebSocketServerSession.handleCommand(
                 sharedResourceLock.withLock {
                     chatRooms[currentRoom]!! -= thisConnection
                 }
-                call.respondRedirect(Paths.ROOM_URI.format(commandArg))
+                if (commandArg == DEFAULT_ROOM)
+                    call.respondRedirect(Paths.DEFAULT_URI)
+                else
+                    call.respondRedirect(Paths.ROOM_URI.format(commandArg))
             }
             KtorcConstants.COMMAND.DELETE_ROOM -> {} // Not required so can wait
             null -> {}
