@@ -1,14 +1,12 @@
 package com.ktorc.server
 
 import com.ktorc.KtorcConstants.Paths
-import com.ktorc.KtorcConstants.COMMAND
 import com.ktorc.KtorcConstants.Headers
 import com.ktorc.KtorcConstants.Params
 import com.ktorc.KtorcConstants.COMMAND_PREFIX
 import com.ktorc.KtorcConstants.DEFAULT_ROOM
 import com.ktorc.KtorcConstants.STD_RESPONSE_FORMAT
 import io.ktor.http.cio.websocket.*
-import io.ktor.response.*
 import io.ktor.websocket.*
 import io.ktor.routing.*
 import kotlinx.coroutines.sync.Mutex
