@@ -15,7 +15,7 @@ object KtorcConstants {
 
     object Paths {
         const val DEFAULT_URI = "/"
-        const val ROOM_URI = "/room/%s" // {room Id}
+        const val ROOM_URI = "/room/{%s}" // {room Id}
     }
 
     const val COMMAND_PREFIX = "cm&"

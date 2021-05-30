@@ -20,7 +20,11 @@ suspend fun broadcastToRoom(
     msg: String
 ) = room.forEach { it.session.send(Frame.Text(msg)) }
 
-suspend fun DefaultWebSocketServerSession.handleCommand(command: Pair<String?, String?>) {
+suspend fun DefaultWebSocketServerSession.handleCommand(
+    command: Pair<String?, String?>,
+    thisConnection: Connection,
+    currentRoom: String
+) {
     val (uncheckedCommand, commandArg) = command
     uncheckedCommand?.let{
         when (KtorcConstants.COMMAND.nullableValueOf(it)) {
@@ -29,8 +33,12 @@ suspend fun DefaultWebSocketServerSession.handleCommand(command: Pair<String?, S
             KtorcConstants.COMMAND.LIST_ROOMS -> send(
                 Frame.Text("Available rooms: ${chatRooms.keys}")
             )
-            KtorcConstants.COMMAND.JOIN_ROOM -> if (commandArg != null)
+            KtorcConstants.COMMAND.JOIN_ROOM -> if (commandArg != null) {
+                sharedResourceLock.withLock {
+                    chatRooms[currentRoom]!! -= thisConnection
+                }
                 call.respondRedirect(Paths.ROOM_URI.format(commandArg))
+            }
             KtorcConstants.COMMAND.DELETE_ROOM -> {} // Not required so can wait
             null -> {}
         }

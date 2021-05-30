@@ -50,7 +50,7 @@ fun Route.getGlobalChat() {
                 if (text.contains(COMMAND_PREFIX)) {
                     val command: Pair<String?, String?> = text
                         .substringAfter(COMMAND_PREFIX).split(" ").toPair()
-                    handleCommand(command)
+                    handleCommand(command, userConnection, DEFAULT_ROOM)
                 }
 
                 broadcastToRoom(
