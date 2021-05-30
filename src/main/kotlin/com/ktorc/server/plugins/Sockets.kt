@@ -49,7 +49,7 @@ fun Route.getGlobalChat() {
                             outgoing.send(Frame.Text("Created room: $roomId"))
                         }
                         COMMAND.LIST_ROOMS -> outgoing.send(
-                            Frame.Text(chatRooms.toString())
+                            Frame.Text("Available rooms: $chatRooms")
                         )
                         COMMAND.CHANGE_ROOM -> {}
                         COMMAND.DELETE_ROOM -> {}

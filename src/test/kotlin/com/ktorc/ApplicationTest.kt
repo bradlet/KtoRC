@@ -50,15 +50,18 @@ class ApplicationTest {
                 addHeader(KtorcConstants.Headers.USER_IDENTIFIER, testUId)
             }) { incoming, outgoing ->
                 incoming.receive() // wipe out welcome msg
-                for (room in rooms) {
+                for (room in rooms)
                     outgoing.send(Frame.Text("cm&CREATE_ROOM $room"))
-                    incoming.receive()
-                }
-
                 outgoing.send(Frame.Text("cm&LIST_ROOMS"))
-                val response = (incoming.receive() as Frame.Text).readText()
-                for (room in rooms) {
-                    assert(response.contains(room))
+
+                for (frame in incoming) {
+                    val response = (frame as Frame.Text).readText()
+                    if (response.contains("Available")) {
+                        for (room in rooms) {
+                            assert(response.contains(room))
+                        }
+                        return@handleWebSocketConversation // break out of scope to end test
+                    }
                 }
             }
         }
