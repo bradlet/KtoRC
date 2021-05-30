@@ -11,4 +11,21 @@ object KtorcConstants {
     object Params {
         const val ROOM_IDENTIFIER = "room_id"
     }
+
+    const val COMMAND_PREFIX = "cm&"
+    enum class COMMAND {
+        CREATE_ROOM,
+        CHANGE_ROOM,
+        DELETE_ROOM;
+
+        companion object{
+            fun nullableValueOf(value: String): COMMAND? {
+                return if (values().map { it.name }.contains(value))
+                    valueOf(value)
+                else
+                    null
+            }
+        }
+    }
+
 }

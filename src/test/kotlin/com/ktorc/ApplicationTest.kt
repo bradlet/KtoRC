@@ -15,24 +15,14 @@ class ApplicationTest {
     }
 
     @Test
-    fun testConventionalConversation() {
+    fun testRootWelcomeMessage() {
         withTestApplication({ setupWebSockets() }) {
 
             handleWebSocketConversation("/", {
                 addHeader(KtorcConstants.Headers.USER_IDENTIFIER, testUId)
-            }) { incoming, outgoing ->
+            }) { incoming, _ ->
                 val welcomeMsg = (incoming.receive() as Frame.Text).readText()
-                assert(welcomeMsg.isNotEmpty())
-
-                delay(500L)
-                for (msg in testMessages) {
-                    outgoing.send(Frame.Text(msg))
-
-                    val responseMsg: String = (incoming.receive() as Frame.Text).readText()
-                    val expected = STD_RESPONSE_FORMAT.format(testUId, msg)
-                    assertEquals(responseMsg, expected)
-                    delay(500L)
-                }
+                assert(welcomeMsg.contains(testUId))
             }
         }
     }
