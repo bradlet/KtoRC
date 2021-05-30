@@ -8,9 +8,13 @@ import com.ktorc.KtorcConstants.STD_RESPONSE_FORMAT
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import io.ktor.routing.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+private val sharedResourceLock = Mutex()
 
 // A running list of all chat room Ids that currently exist. Global is always present.
-val chatRooms = mutableListOf("Global")
+private val chatRooms = mutableListOf("Global")
 
 /**
  * Root path
@@ -31,9 +35,22 @@ fun Route.getGlobalChat() {
                 val text = frame.readText()
 
                 if (text.contains(COMMAND_PREFIX)) {
-                    val uncheckedCommand: String = text.substringAfter(COMMAND_PREFIX)
-                    when (COMMAND.nullableValueOf(uncheckedCommand)) {
-                        COMMAND.CREATE_ROOM -> {}
+                    val uncheckedCommand = text
+                        .substringAfter(COMMAND_PREFIX)
+                        .split(" ")
+
+                    when (COMMAND.nullableValueOf(uncheckedCommand[0])) {
+                        COMMAND.CREATE_ROOM -> {
+                            val roomId = uncheckedCommand[1]
+                            sharedResourceLock.withLock {
+                                if (!chatRooms.contains(roomId))
+                                    chatRooms.add(roomId)
+                            }
+                            outgoing.send(Frame.Text("Created room: $roomId"))
+                        }
+                        COMMAND.LIST_ROOMS -> outgoing.send(
+                            Frame.Text(chatRooms.toString())
+                        )
                         COMMAND.CHANGE_ROOM -> {}
                         COMMAND.DELETE_ROOM -> {}
                         null -> {}

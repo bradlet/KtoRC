@@ -16,7 +16,8 @@ object KtorcConstants {
     enum class COMMAND {
         CREATE_ROOM,
         CHANGE_ROOM,
-        DELETE_ROOM;
+        DELETE_ROOM,
+        LIST_ROOMS;
 
         companion object{
             fun nullableValueOf(value: String): COMMAND? {

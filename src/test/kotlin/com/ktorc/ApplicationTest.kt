@@ -1,11 +1,9 @@
 package com.ktorc
 
-import com.ktorc.KtorcConstants.STD_RESPONSE_FORMAT
 import com.ktorc.server.setupWebSockets
 import io.ktor.http.cio.websocket.*
 import kotlin.test.*
 import io.ktor.server.testing.*
-import kotlinx.coroutines.delay
 
 class ApplicationTest {
 
@@ -23,6 +21,45 @@ class ApplicationTest {
             }) { incoming, _ ->
                 val welcomeMsg = (incoming.receive() as Frame.Text).readText()
                 assert(welcomeMsg.contains(testUId))
+            }
+        }
+    }
+
+    @Test
+    fun testRoomCreationCommand() {
+        val room = "testRoom"
+        withTestApplication({ setupWebSockets() }) {
+
+            handleWebSocketConversation("/", {
+                addHeader(KtorcConstants.Headers.USER_IDENTIFIER, testUId)
+            }) { incoming, outgoing ->
+                incoming.receive() // wipe out welcome msg
+                outgoing.send(Frame.Text("cm&CREATE_ROOM $room"))
+                val response = (incoming.receive() as Frame.Text).readText()
+                assert(response.contains(room))
+            }
+        }
+    }
+
+    @Test
+    fun testListRoomsCommand() {
+        val rooms = listOf("room1", "room2", "room3")
+        withTestApplication({ setupWebSockets() }) {
+
+            handleWebSocketConversation("/", {
+                addHeader(KtorcConstants.Headers.USER_IDENTIFIER, testUId)
+            }) { incoming, outgoing ->
+                incoming.receive() // wipe out welcome msg
+                for (room in rooms) {
+                    outgoing.send(Frame.Text("cm&CREATE_ROOM $room"))
+                    incoming.receive()
+                }
+
+                outgoing.send(Frame.Text("cm&LIST_ROOMS"))
+                val response = (incoming.receive() as Frame.Text).readText()
+                for (room in rooms) {
+                    assert(response.contains(room))
+                }
             }
         }
     }
