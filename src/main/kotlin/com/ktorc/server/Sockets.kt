@@ -1,4 +1,4 @@
-package com.ktorc.server.plugins
+package com.ktorc.server
 
 import com.ktorc.KtorcConstants.COMMAND
 import com.ktorc.KtorcConstants.Headers
@@ -11,10 +11,10 @@ import io.ktor.routing.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-private val sharedResourceLock = Mutex()
+internal val sharedResourceLock = Mutex()
 
 // A running list of all chat room Ids that currently exist. Global is always present.
-private val chatRooms = mutableListOf("Global")
+internal val chatRooms = mutableListOf("Global")
 
 /**
  * Root path
@@ -46,9 +46,9 @@ fun Route.getGlobalChat() {
                                 if (!chatRooms.contains(roomId))
                                     chatRooms.add(roomId)
                             }
-                            outgoing.send(Frame.Text("Created room: $roomId"))
+                            send(Frame.Text("Created room: $roomId"))
                         }
-                        COMMAND.LIST_ROOMS -> outgoing.send(
+                        COMMAND.LIST_ROOMS -> send(
                             Frame.Text("Available rooms: $chatRooms")
                         )
                         COMMAND.CHANGE_ROOM -> {}
@@ -57,9 +57,7 @@ fun Route.getGlobalChat() {
                     }
                 }
 
-                outgoing.send(
-                    Frame.Text(STD_RESPONSE_FORMAT.format(userId, text))
-                )
+                send(Frame.Text(STD_RESPONSE_FORMAT.format(userId, text)))
 
                 if (text.equals("bye", ignoreCase = true)) {
                     close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))

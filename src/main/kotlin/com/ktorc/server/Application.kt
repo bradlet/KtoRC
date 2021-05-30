@@ -1,7 +1,5 @@
 package com.ktorc.server
 
-import com.ktorc.server.plugins.getChatRoom
-import com.ktorc.server.plugins.getGlobalChat
 import io.ktor.application.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
