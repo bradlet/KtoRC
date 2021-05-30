@@ -31,38 +31,8 @@ fun Route.getGlobalChat() {
     webSocket(Paths.DEFAULT_URI) { // websocketSession
         val userId: String = call.request.headers[Headers.USER_IDENTIFIER] ?:
             throw IllegalAccessError("User identifier absent; Please provide user id.")
-        val userConnection = Connection(this, userId)
 
-        // Create and add user connection to global chat room, then send welcome msg
-        sharedResourceLock.withLock {
-            chatRooms[DEFAULT_ROOM]!! += userConnection
-        }
-        broadcastToRoom(
-            chatRooms[DEFAULT_ROOM]!!,
-            "Welcome $userId to the global chat!"
-        )
-
-        for (frame in incoming) {
-            if (frame is Frame.Text) {
-                val text = frame.readText()
-
-                // Handle optional commands that can appear at any point in a msg
-                if (text.contains(COMMAND_PREFIX)) {
-                    val command: Pair<String?, String?> = text
-                        .substringAfter(COMMAND_PREFIX).split(" ").toPair()
-                    handleCommand(command, userConnection, DEFAULT_ROOM)
-                }
-
-                broadcastToRoom(
-                    chatRooms[DEFAULT_ROOM]!!,
-                    STD_RESPONSE_FORMAT.format(userId, text)
-                )
-
-                if (text.equals("bye", ignoreCase = true)) {
-                    close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-                }
-            }
-        }
+        runRoom(DEFAULT_ROOM, userId)
     }
 }
 
@@ -71,7 +41,49 @@ fun Route.getGlobalChat() {
  */
 fun Route.getChatRoom() {
     webSocket(Paths.ROOM_URI.format(Params.ROOM_IDENTIFIER)) {
+        val userId: String = call.request.headers[Headers.USER_IDENTIFIER] ?:
+            throw IllegalAccessError("User identifier absent; Please provide user id.")
         val room = call.parameters[Params.ROOM_IDENTIFIER] ?:
             throw IllegalStateException("Room entry refused; no room id provided.")
+
+        runRoom(room, userId)
+    }
+}
+
+private suspend fun DefaultWebSocketServerSession.runRoom(
+    roomName: String,
+    userId: String
+) {
+    val userConnection = Connection(this, userId)
+
+    // Create and add user connection to this chat room, then send welcome msg
+    sharedResourceLock.withLock {
+        chatRooms[roomName]!! += userConnection
+    }
+    broadcastToRoom(
+        chatRooms[roomName]!!,
+        "Welcome $userId to the $roomName chat!"
+    )
+
+    for (frame in incoming) {
+        if (frame is Frame.Text) {
+            val text = frame.readText()
+
+            // Handle optional commands that can appear at any point in a msg
+            if (text.contains(COMMAND_PREFIX)) {
+                val command: Pair<String?, String?> = text
+                    .substringAfter(COMMAND_PREFIX).split(" ").toPair()
+                handleCommand(command, userConnection, roomName)
+            }
+
+            broadcastToRoom(
+                chatRooms[roomName]!!,
+                STD_RESPONSE_FORMAT.format(userId, text)
+            )
+
+            if (text.equals("bye", ignoreCase = true)) {
+                close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
+            }
+        }
     }
 }
