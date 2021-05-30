@@ -15,7 +15,7 @@ suspend fun DefaultWebSocketServerSession.createRoom(newRoomId: String) {
     send(Frame.Text("Created room: $newRoomId"))
 }
 
-suspend fun DefaultWebSocketServerSession.broadcastToRoom(
+suspend fun broadcastToRoom(
     room: List<Connection>,
     msg: String
 ) = room.forEach { it.session.send(Frame.Text(msg)) }
