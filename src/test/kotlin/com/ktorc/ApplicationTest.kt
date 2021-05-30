@@ -12,6 +12,11 @@ class ApplicationTest {
         private val testMessages = listOf("Who goes there?!", "This is a weird echo")
     }
 
+    /**
+     * Note: Can't run all tests together, something w/ test app context not being
+     * recreated w/ each test. All tests after first fail b/c session closed.
+     */
+
     @Test
     fun testRootWelcomeMessage() {
         withTestApplication({ setupWebSockets() }) {
