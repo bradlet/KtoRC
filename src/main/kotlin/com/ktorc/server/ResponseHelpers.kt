@@ -13,7 +13,7 @@ suspend fun DefaultWebSocketServerSession.createRoom(newRoomId: String) {
         if (!chatRooms.containsKey(newRoomId))
             chatRooms[newRoomId] = mutableListOf()
     }
-    send(Frame.Text("Created room: $newRoomId"))
+    send("Created room: $newRoomId")
 }
 
 suspend fun broadcastToRoom(
@@ -32,7 +32,7 @@ suspend fun DefaultWebSocketServerSession.handleCommand(
             KtorcConstants.COMMAND.CREATE_ROOM -> if (commandArg != null)
                 createRoom(commandArg)
             KtorcConstants.COMMAND.LIST_ROOMS -> send(
-                Frame.Text("Available rooms: ${chatRooms.keys}")
+                "Available rooms: ${chatRooms.keys}"
             )
             KtorcConstants.COMMAND.JOIN_ROOM -> if (commandArg != null) {
                 sharedResourceLock.withLock {
