@@ -23,7 +23,6 @@ fun Application.setupWebSockets() {
     }
 
     routing {
-        getGlobalChat()
-        getChatRoom()
+        getChat()
     }
 }

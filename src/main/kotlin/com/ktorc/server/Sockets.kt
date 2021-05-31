@@ -2,10 +2,10 @@ package com.ktorc.server
 
 import com.ktorc.KtorcConstants.Paths
 import com.ktorc.KtorcConstants.Headers
-import com.ktorc.KtorcConstants.Params
 import com.ktorc.KtorcConstants.COMMAND_PREFIX
 import com.ktorc.KtorcConstants.DEFAULT_ROOM
 import com.ktorc.KtorcConstants.STD_RESPONSE_FORMAT
+import com.ktorc.KtorcConstants.WELCOME_MSG_FORMAT
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import io.ktor.routing.*
@@ -25,63 +25,49 @@ internal val chatRooms: MutableMap<String, MutableList<Connection>> = mutableMap
  *
  * A 'global chat' which supports functionality to create private chat sessions/rooms.
  */
-fun Route.getGlobalChat() {
+fun Route.getChat() {
     webSocket(Paths.DEFAULT_URI) { // websocketSession
         val userId: String = call.request.headers[Headers.USER_IDENTIFIER] ?:
             throw IllegalAccessError("User identifier absent; Please provide user id.")
+        val userConnection = Connection(this, userId, mutableListOf(DEFAULT_ROOM))
 
-        runRoom(DEFAULT_ROOM, userId)
-    }
-}
+        // Create and add user connection to this chat room, then send welcome msg
+        sharedResourceLock.withLock {
+            chatRooms[DEFAULT_ROOM]!! += userConnection
+        }
+        broadcastToRoom(
+            chatRooms[DEFAULT_ROOM]!!,
+            WELCOME_MSG_FORMAT.format(userId, DEFAULT_ROOM)
+        )
 
-/**
- * Chat Room Session Path
- */
-fun Route.getChatRoom() {
-    webSocket(Paths.ROOM_URI.format(Params.ROOM_IDENTIFIER)) {
-        val userId: String = call.request.headers[Headers.USER_IDENTIFIER] ?:
-            throw IllegalAccessError("User identifier absent; Please provide user id.")
-        val room = call.parameters[Params.ROOM_IDENTIFIER] ?:
-            throw IllegalStateException("Room entry refused; no room id provided.")
+        // Main Chat Response Loop
+        for (frame in incoming) {
+            if (frame is Frame.Text) {
+                val text = frame.readText()
 
-        runRoom(room, userId)
-    }
-}
+                // Handle optional commands that can appear at any point in a msg
+                if (text.contains(COMMAND_PREFIX)) {
+                    val command: Pair<String?, String?> = text
+                        .substringAfter(COMMAND_PREFIX).split(" ").toPair()
+                    handleCommand(command, userConnection)
+                }
 
-private suspend fun DefaultWebSocketServerSession.runRoom(
-    roomName: String,
-    userId: String
-) {
-    val userConnection = Connection(this, userId)
+                // Send this message from incoming to the room. For now assume user
+                // can only be in one room:
+                broadcastToRoom(
+                    chatRooms[userConnection.rooms[0]]!!,
+                    STD_RESPONSE_FORMAT.format(userId, text)
+                )
 
-    // Create and add user connection to this chat room, then send welcome msg
-    sharedResourceLock.withLock {
-        chatRooms[roomName]!! += userConnection
-    }
-    broadcastToRoom(
-        chatRooms[roomName]!!,
-        "Welcome $userId to the $roomName chat!"
-    )
-
-    for (frame in incoming) {
-        if (frame is Frame.Text) {
-            val text = frame.readText()
-
-            // Handle optional commands that can appear at any point in a msg
-            if (text.contains(COMMAND_PREFIX)) {
-                val command: Pair<String?, String?> = text
-                    .substringAfter(COMMAND_PREFIX).split(" ").toPair()
-                handleCommand(command, userConnection, roomName)
-            }
-
-            broadcastToRoom(
-                chatRooms[roomName]!!,
-                STD_RESPONSE_FORMAT.format(userId, text)
-            )
-
-            if (text.equals("bye", ignoreCase = true)) {
-                close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
+                // Handle user exit code
+                if (text.equals("bye", ignoreCase = true)) {
+                    sharedResourceLock.withLock {
+                        userConnection.rooms.forEach { chatRooms[it]!! -= userConnection }
+                    }
+                    close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
+                }
             }
         }
+
     }
 }

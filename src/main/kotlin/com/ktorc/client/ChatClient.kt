@@ -1,3 +1,5 @@
+@file:JvmName("ChatClient")
+
 package com.ktorc.client
 
 import com.ktorc.KtorcConstants.Paths
@@ -42,17 +44,24 @@ fun main() {
     println("KtoRC chat session has ended.")
 }
 
+private var stopCommunication = false
+
 internal suspend fun DefaultClientWebSocketSession.printIncoming() {
     try {
-        for (message in incoming)
+        for (message in incoming) {
+            if (message is Frame.Close) {
+                stopCommunication = true
+                return
+            }
             println((message as Frame.Text).readText())
+        }
     } catch (e: Exception) {
+        stopCommunication = true
         println("Exception: ${e.message}")
     }
 }
 
 internal suspend fun DefaultClientWebSocketSession.sendUserInput() {
-    var stop = false
     do {
         try {
             val msg = readLine()
@@ -65,7 +74,7 @@ internal suspend fun DefaultClientWebSocketSession.sendUserInput() {
 
         } catch (e: Exception) {
             println(e.message)
-            stop = true
+            stopCommunication = true
         }
-    } while (!stop)
+    } while (!stopCommunication)
 }
