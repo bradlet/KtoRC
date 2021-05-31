@@ -22,7 +22,8 @@ object KtorcConstants {
     enum class COMMAND {
         CREATE_ROOM,
         JOIN_ROOM,
-        LIST_ROOMS;
+        LIST_ROOMS,
+        HERE;
         //DELETE_ROOM,
 
         companion object{

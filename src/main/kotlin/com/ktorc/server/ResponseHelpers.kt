@@ -33,6 +33,10 @@ suspend fun DefaultWebSocketServerSession.handleCommand(
                 "Available rooms: ${chatRooms.keys}"
             )
             KtorcConstants.COMMAND.JOIN_ROOM -> joinRoom(commandArg, thisConnection)
+            KtorcConstants.COMMAND.HERE -> send(
+                "Users in ${thisConnection.rooms[0]}: ${chatRooms[thisConnection.rooms[0]]
+                    ?.map { userConnection -> userConnection.userId }}"
+            )
             //KtorcConstants.COMMAND.DELETE_ROOM -> {} // Not required so can wait
             null -> {}
         }
