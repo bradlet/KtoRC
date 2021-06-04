@@ -5,7 +5,7 @@ object KtorcConstants {
     const val DEFAULT_ROOM = "Global"
 
     // TEMPLATES
-    const val STD_RESPONSE_FORMAT = "%s SAID: %s" // {user Id} {message}
+    const val STD_RESPONSE_FORMAT = "%s: %s" // {user Id} {message}
     const val WELCOME_MSG_FORMAT = "Welcome %s to the %s chat!" // {user Id} {room id}
 
     object Headers {

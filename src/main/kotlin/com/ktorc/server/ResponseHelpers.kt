@@ -8,7 +8,7 @@ suspend fun broadcastToRooms(
 ) {
     rooms.forEach { roomName ->
         chatRooms[roomName]?.forEach {
-            it.session.send(Frame.Text(msg))
+            it.session.send(Frame.Text("[$roomName] $msg"))
         }
     }
 
