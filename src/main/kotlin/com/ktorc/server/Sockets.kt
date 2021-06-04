@@ -42,18 +42,18 @@ fun Route.getChat() {
             if (frame is Frame.Text) {
                 val text = frame.readText()
 
-                // Handle optional commands that can appear at any point in a msg
+                /*** IF COMMAND IS PRESENT, DON'T BROADCAST MESSAGE ***/
                 if (text.contains(COMMAND_PREFIX)) {
                     val command: Pair<String?, String?> = text
                         .substringAfter(COMMAND_PREFIX).split(" ").toPair()
                     handleCommand(command, userConnection)
+                } else {
+                    // Send this message to all rooms this user currently occupies
+                    broadcastToRooms(
+                        STD_RESPONSE_FORMAT.format(userId, text),
+                        *userConnection.rooms.toTypedArray()
+                    )
                 }
-
-                // Send this message to all rooms this user currently occupies
-                broadcastToRooms(
-                    STD_RESPONSE_FORMAT.format(userId, text),
-                    *userConnection.rooms.toTypedArray()
-                )
 
                 // Handle user exit code
                 if (text.equals("bye", ignoreCase = true)) {
