@@ -29,16 +29,13 @@ fun Route.getChat() {
     webSocket(Paths.DEFAULT_URI) { // websocketSession
         val userId: String = call.request.headers[Headers.USER_IDENTIFIER] ?:
             throw IllegalAccessError("User identifier absent; Please provide user id.")
-        val userConnection = Connection(this, userId, mutableListOf(DEFAULT_ROOM))
+        val userConnection = Connection(this,  userId, mutableListOf(DEFAULT_ROOM))
 
         // Create and add user connection to this chat room, then send welcome msg
         sharedResourceLock.withLock {
             chatRooms[DEFAULT_ROOM]!! += userConnection
         }
-        broadcastToRoom(
-            chatRooms[DEFAULT_ROOM]!!,
-            WELCOME_MSG_FORMAT.format(userId, DEFAULT_ROOM)
-        )
+        broadcastToRooms(WELCOME_MSG_FORMAT.format(userId, DEFAULT_ROOM), DEFAULT_ROOM)
 
         // Main Chat Response Loop
         for (frame in incoming) {
@@ -52,11 +49,10 @@ fun Route.getChat() {
                     handleCommand(command, userConnection)
                 }
 
-                // Send this message from incoming to the room. For now assume user
-                // can only be in one room:
-                broadcastToRoom(
-                    chatRooms[userConnection.rooms[0]]!!,
-                    STD_RESPONSE_FORMAT.format(userId, text)
+                // Send this message to all rooms this user currently occupies
+                broadcastToRooms(
+                    STD_RESPONSE_FORMAT.format(userId, text),
+                    *userConnection.rooms.toTypedArray()
                 )
 
                 // Handle user exit code
