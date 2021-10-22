@@ -4,6 +4,17 @@ object KtorcConstants {
 
     const val DEFAULT_ROOM = "Global"
 
+    // Secret-Related Constants
+    const val SECRET_VERSION = "1"
+    const val PROJECT = "thompson-gcp"
+
+    // Database Constants
+    val JDBC_URL_TEMPLATE = """
+        jdbc:postgresql:///%s?cloudSqlInstance=%s&socketFactory=
+        com.google.cloud.sql.postgres.SocketFactory&user=%s&password=%s
+    """.trimIndent() // <DB_NAME> <CLOUD_SQL_CONNECTION_NAME> <DB_USER> <DB_PASS>
+
+
     // TEMPLATES
     const val STD_RESPONSE_FORMAT = "%s: %s" // {user Id} {message}
     const val WELCOME_MSG_FORMAT = "Welcome %s to the %s chat!" // {user Id} {room id}

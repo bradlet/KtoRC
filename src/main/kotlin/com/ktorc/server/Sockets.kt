@@ -1,5 +1,6 @@
 package com.ktorc.server
 
+import com.google.cloud.secretmanager.v1.SecretManagerServiceClient
 import com.ktorc.KtorcConstants.Paths
 import com.ktorc.KtorcConstants.Headers
 import com.ktorc.KtorcConstants.COMMAND_PREFIX
@@ -25,7 +26,7 @@ internal val chatRooms: MutableMap<String, MutableList<Connection>> = mutableMap
  *
  * A 'global chat' which supports functionality to create private chat sessions/rooms.
  */
-fun Route.getChat() {
+fun Route.getChat(databaseManager: DatabaseManager) {
     webSocket(Paths.DEFAULT_URI) { // websocketSession
         val userId: String = call.request.headers[Headers.USER_IDENTIFIER] ?:
             throw IllegalAccessError("User identifier absent; Please provide user id.")
