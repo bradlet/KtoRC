@@ -4,6 +4,7 @@ import com.google.cloud.secretmanager.v1.SecretManagerServiceClient
 import com.google.cloud.secretmanager.v1.SecretVersionName
 import com.ktorc.KtorcConstants
 import com.ktorc.KtorcConstants.JDBC_URL_TEMPLATE
+import com.ktorc.server.crud.DatabaseManager
 import io.ktor.application.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
